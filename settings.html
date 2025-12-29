@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import/Export Đề Thi</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .import-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            border-color: var(--primary-color);
+            background: #f0f7ff;
+        }
+
+        .drop-zone-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #357abd;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .validation-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .validation-result.success {
+            background-color: #e8f5e9;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .validation-result.error {
+            background-color: #ffebee;
+            border-left: 4px solid var(--error-color);
+        }
+
+        .validation-result.warning {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+        }
+
+        .exam-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .exam-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .exam-info {
+            flex: 1;
+        }
+
+        .exam-title {
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+
+        .exam-meta {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+        }
+
+        .exam-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            margin-top: 5px;
+        }
+
+        .error-list,
+        .warning-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .error-list li {
+            color: var(--error-color);
+            margin: 5px 0;
+        }
+
+        .warning-list li {
+            color: #ff9800;
+            margin: 5px 0;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .tip-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-color);
+            line-height: 1.8;
+        }
+
+        .tip-box code {
+            background: white;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        #success-actions {
+            animation: slideIn 0.5s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation will be inserted here by JS -->
+
+    <div class="container my-4">
+        <div class="text-center mb-4">
+            <h2 class="display-6 fw-bold text-primary">
+                <i class="bi bi-gear"></i> Cấu Hình & Quản Lý Dữ Liệu
+            </h2>
+        </div>
+
+        <!-- Storage Info -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-database"></i> Thông Tin Lưu Trữ</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 text-center">
+                    <div class="col-4">
+                        <h4 class="text-primary mb-0" id="stat-exams">0</h4>
+                        <small class="text-muted">Bộ đề</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-success mb-0" id="stat-questions">0</h4>
+                        <small class="text-muted">Câu hỏi</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-info mb-0" id="stat-size">0 KB</h4>
+                        <small class="text-muted">Dung lượng</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-upload"></i> Import Đề Thi</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h6 class="alert-heading"><i class="bi bi-lightbulb"></i> Tip: Format đơn giản cho Furigana!
+                    </h6>
+                    <p class="mb-2">
+                        Không cần viết <code>&lt;ruby&gt;</code> tags phức tạp.
+                        Chỉ cần: <code>漢字[かんじ]</code>
+                    </p>
+                    <p class="mb-2">Ví dụ: <code>"q": "私[わたし]は学生[がくせい]です。"</code></p>
+                    <hr>
+                    <p class="mb-0">
+                        <strong>📦 File mẫu:</strong><br>
+                        <a href="data/example-import.json" download class="alert-link me-3">
+                            <i class="bi bi-download"></i> Format đơn giản
+                        </a>
+                        <a href="data/example-with-timer.json" download class="alert-link">
+                            <i class="bi bi-clock"></i> Có Timer (3 phút)
+                        </a>
+                    </p>
+                </div>
+
+                <div class="drop-zone text-center p-5" id="drop-zone">
+                    <i class="bi bi-file-earmark-arrow-up" style="font-size: 4rem; color: #4a90e2;"></i>
+                    <h5 class="mt-3">Kéo thả file JSON vào đây</h5>
+                    <p class="text-muted">hoặc click để chọn file</p>
+                    <input type="file" id="file-input" accept=".json">
+                </div>
+
+                <div class="validation-result" id="validation-result"></div>
+
+                <!-- Metadata Form -->
+                <div id="metadata-form"
+                    style="display: none; margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+                    <h4 style="margin-bottom: 15px; color: var(--primary-color);">📝 Thông Tin Bài Thi</h4>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Tên bài thi:</label>
+                        <input type="text" id="exam-title" class="form-input" placeholder="Nhập tên bài thi...">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Level:</label>
+                            <select id="exam-level" class="form-input">
+                                <option value="n5">N5</option>
+                                <option value="n4">N4</option>
+                                <option value="n3">N3</option>
+                                <option value="n2">N2</option>
+                                <option value="n1">N1</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Thời gian
+                                (phút):</label>
+                            <input type="number" id="exam-duration" class="form-input" placeholder="VD: 30" min="1"
+                                max="999">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Mô tả (tùy
+                            chọn):</label>
+                        <textarea id="exam-description" class="form-input" rows="3"
+                            placeholder="Nhập mô tả ngắn về bài thi..."></textarea>
+                    </div>
+                </div>
+
+                <div style="margin-top: 15px; text-align: center;">
+                    <button class="btn btn-primary" id="import-btn" style="display: none;">
+                        ✅ Xác nhận Import
+                    </button>
+                </div>
+
+                <!-- Success Actions -->
+                <div id="success-actions"
+                    style="display: none; margin-top: 20px; text-align: center; padding: 20px; background: #e8f5e9; border-radius: 8px;">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                    <h3 style="color: var(--success-color); margin-bottom: 15px;">Import Thành Công!</h3>
+                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <a id="practice-now-btn" class="btn btn-success"
+                            style="text-decoration: none; display: inline-block;">
+                            🚀 Luyện Tập Ngay
+                        </a>
+                        <button class="btn btn-primary" onclick="resetImport()">
+                            📥 Import Thêm
+                        </button>
+                        <a href="index.html" class="btn btn-secondary"
+                            style="text-decoration: none; display: inline-block;">
+                            🏠 Về Trang Chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Imported Exams List -->
+            <div class="section">
+                <div class="section-title">
+                    📚 Danh Sách Đề Đã Import
+                    <button class="btn btn-danger" onclick="clearAllData()"
+                        style="margin-left: auto; font-size: 0.9rem; padding: 5px 15px;">
+                        🗑️ Xóa tất cả
+                    </button>
+                </div>
+                <div class="exam-list" id="exam-list">
+                    <p style="text-align: center; color: #888;">Chưa có dữ liệu</p>
+                </div>
+            </div>
+
+            <!-- Export Section -->
+            <div class="section">
+                <div class="section-title">📤 Export Dữ Liệu</div>
+                <p style="margin-bottom: 15px; color: #666;">Xuất tất cả bộ đề đã import ra file JSON để backup hoặc
+                    chia sẻ.</p>
+                <button class="btn btn-success" onclick="exportAllData()">
+                    💾 Export tất cả
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/validator.js"></script>
+    <script src="js/navigation.js"></script>
+    <script>
+        let pendingExams = [];
+        let lastImportedExamId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            insertNavigation('settings');
+            loadStats();
+            loadExamList();
+            setupDropZone();
+        });
+
+        // Setup drop zone
+        function setupDropZone() {
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('file-input');
+
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('drag-over');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                const file = e.dataTransfer.files[0];
+                if (file) handleFile(file);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) handleFile(file);
+            });
+        }
+
+        // Handle file import
+        function handleFile(file) {
+            if (!file.name.endsWith('.json')) {
+                showValidationResult('error', 'Vui lòng chọn file JSON (.json)');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                validateAndPreview(content);
+            };
+            reader.readAsText(file);
+        }
+
+        // Validate and preview
+        function validateAndPreview(jsonString) {
+            const importResult = storageManager.importFromJson(jsonString);
+
+            if (!importResult.success) {
+                showValidationResult('error', importResult.error);
+                return;
+            }
+
+            const exams = importResult.exams;
+            let allValid = true;
+            let totalErrors = 0;
+            let totalWarnings = 0;
+
+            pendingExams = [];
+
+            exams.forEach((exam, index) => {
+                const result = quizValidator.validateExam(exam);
+
+                if (result.valid) {
+                    pendingExams.push(result.normalized);
+                } else {
+                    allValid = false;
+                    totalErrors += result.errors.length;
+                }
+
+                totalWarnings += result.warnings.length;
+            });
+
+            // Show result
+            let message = `<strong>Tìm thấy ${exams.length} bộ đề</strong><br>`;
+            message += `✅ Hợp lệ: ${pendingExams.length}<br>`;
+
+            if (totalErrors > 0) {
+                message += `❌ Lỗi: ${totalErrors}<br>`;
+            }
+            if (totalWarnings > 0) {
+                message += `⚠️ Cảnh báo: ${totalWarnings}<br>`;
+            }
+
+            if (pendingExams.length > 0) {
+                showValidationResult('success', message);
+                showMetadataForm();
+                document.getElementById('import-btn').style.display = 'inline-block';
+                document.getElementById('import-btn').onclick = confirmImport;
+            } else {
+                showValidationResult('error', message + '<br>Không có bộ đề hợp lệ để import.');
+            }
+        }
+
+        // Show metadata form
+        function showMetadataForm() {
+            const form = document.getElementById('metadata-form');
+            form.style.display = 'block';
+
+            // Pre-fill với data từ quiz đầu tiên (nếu có)
+            if (pendingExams.length > 0) {
+                const firstExam = pendingExams[0];
+                document.getElementById('exam-title').value = firstExam.title || '';
+                document.getElementById('exam-level').value = firstExam.level || 'n5';
+                document.getElementById('exam-duration').value = firstExam.duration || '';
+                document.getElementById('exam-description').value = firstExam.description || '';
+            }
+        }
+
+        // Hide metadata form
+        function hideMetadataForm() {
+            document.getElementById('metadata-form').style.display = 'none';
+        }
+
+        // Confirm import
+        function confirmImport() {
+            // Lấy metadata từ form
+            const title = document.getElementById('exam-title').value.trim();
+            const level = document.getElementById('exam-level').value;
+            const duration = parseInt(document.getElementById('exam-duration').value) || null;
+            const description = document.getElementById('exam-description').value.trim();
+
+            if (!title) {
+                alert('⚠️ Vui lòng nhập tên bài thi!');
+                return;
+            }
+
+            let successCount = 0;
+
+            pendingExams.forEach(exam => {
+                // Override metadata với input từ user
+                exam.title = title;
+                exam.level = level;
+                exam.duration = duration;
+                exam.description = description || exam.description;
+
+                if (storageManager.saveImportedExam(exam)) {
+                    successCount++;
+                    lastImportedExamId = exam.id;
+                }
+            });
+
+            if (successCount > 0) {
+                showSuccessActions();
+                loadStats();
+                loadExamList();
+            } else {
+                alert('❌ Có lỗi khi import!');
+            }
+        }
+
+        // Show success actions
+        function showSuccessActions() {
+            document.getElementById('import-btn').style.display = 'none';
+            document.getElementById('validation-result').style.display = 'none';
+            document.getElementById('metadata-form').style.display = 'none';
+
+            const successDiv = document.getElementById('success-actions');
+            successDiv.style.display = 'block';
+
+            // Set link "Luyện tập ngay"
+            if (lastImportedExamId) {
+                const practiceBtn = document.getElementById('practice-now-btn');
+                practiceBtn.href = `quiz.html?id=${lastImportedExamId}&source=imported`;
+            }
+        }
+
+        // Reset import form
+        function resetImport() {
+            document.getElementById('success-actions').style.display = 'none';
+            document.getElementById('validation-result').style.display = 'none';
+            hideMetadataForm();
+            document.getElementById('file-input').value = '';
+            pendingExams = [];
+            lastImportedExamId = null;
+        }
+
+        // Show validation result
+        function showValidationResult(type, message) {
+            const resultDiv = document.getElementById('validation-result');
+            resultDiv.className = `validation-result ${type}`;
+            resultDiv.innerHTML = message;
+            resultDiv.style.display = 'block';
+        }
+
+        // Load stats
+        function loadStats() {
+            const info = storageManager.getStorageInfo();
+            document.getElementById('stat-exams').textContent = info.examCount;
+            document.getElementById('stat-questions').textContent = info.totalQuestions;
+            document.getElementById('stat-size').textContent = info.sizeInKB + ' KB';
+        }
+
+        // Load exam list
+        function loadExamList() {
+            const exams = storageManager.getAllImportedExams();
+            const listDiv = document.getElementById('exam-list');
+
+            if (exams.length === 0) {
+                listDiv.innerHTML = '<p style="text-align: center; color: #888;">Chưa có dữ liệu</p>';
+                return;
+            }
+
+            listDiv.innerHTML = exams.map(exam => {
+                const durationText = exam.duration ? `⏱️ ${exam.duration} phút | ` : '';
+                return `
+                    <div class="exam-item">
+                        <div class="exam-info">
+                            <div class="exam-title">${exam.title}</div>
+                            <div class="exam-meta">
+                                ID: ${exam.id} |
+                                Level: ${exam.level.toUpperCase()} |
+                                ${durationText}
+                                ${exam.questions?.length || 0} câu hỏi |
+                                Import: ${new Date(exam.importedAt).toLocaleDateString('vi-VN')}
+                            </div>
+                        </div>
+                        <div class="exam-actions">
+                            <a href="quiz.html?id=${exam.id}&source=imported" class="btn btn-success" style="padding: 5px 15px; font-size: 0.9rem; text-decoration: none;">
+                                🚀 Làm bài
+                            </a>
+                            <button class="btn btn-primary" onclick="exportExam('${exam.id}')" style="padding: 5px 15px; font-size: 0.9rem;">
+                                💾 Export
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteExam('${exam.id}')" style="padding: 5px 15px; font-size: 0.9rem;">
+                                🗑️ Xóa
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Export single exam
+        function exportExam(examId) {
+            const json = storageManager.exportExamToJson(examId);
+            if (!json) {
+                alert('Không tìm thấy bộ đề!');
+                return;
+            }
+
+            const exam = storageManager.getExamById(examId);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${exam.id}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Export all data
+        function exportAllData() {
+            const json = storageManager.exportAllExams();
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `all-exams-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert('✅ Đã export thành công!');
+        }
+
+        // Delete exam
+        function deleteExam(examId) {
+            if (confirm('Bạn có chắc muốn xóa bộ đề này?')) {
+                if (storageManager.deleteExam(examId)) {
+                    loadStats();
+                    loadExamList();
+                    alert('✅ Đã xóa thành công!');
+                } else {
+                    alert('❌ Có lỗi xảy ra!');
+                }
+            }
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('⚠️ Bạn có chắc muốn xóa TẤT CẢ dữ liệu? Hành động này không thể hoàn tác!')) {
+                if (confirm('Xác nhận lần cuối! Xóa tất cả?')) {
+                    if (storageManager.clearAll()) {
+                        loadStats();
+                        loadExamList();
+                        alert('✅ Đã xóa tất cả dữ liệu!');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

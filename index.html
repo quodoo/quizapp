@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Thi Tiếng Nhật - Chọn Bài Thi</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <!-- Navigation will be inserted here by JS -->
+
+    <div class="container my-4">
+        <div class="text-center mb-4">
+            <h1 class="display-5 fw-bold text-primary">Chọn Bài Thi</h1>
+            <p class="lead text-muted">Chọn một bài thi để bắt đầu luyện tập hoặc kiểm tra</p>
+        </div>
+
+        <!-- Search Box -->
+        <div class="mb-4">
+            <div class="input-group input-group-lg">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" id="search-input" class="form-control" placeholder="Tìm kiếm bài thi..."
+                    onkeyup="filterQuizzes()">
+            </div>
+        </div>
+
+        <div class="row g-4" id="quiz-list">
+            <!-- Quiz cards will be inserted here dynamically -->
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/navigation.js"></script>
+    <script>
+        // Load available quizzes (from both JSON file and localStorage)
+        async function loadQuizList() {
+            const quizList = document.getElementById('quiz-list');
+            quizList.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Đang tải...</p>';
+
+            try {
+                let allQuizzes = [];
+
+                // Load from JSON file
+                try {
+                    const response = await fetch('data/quizzes.json');
+                    const data = await response.json();
+                    allQuizzes = data.quizzes.map(q => ({ ...q, source: 'default' }));
+                } catch (error) {
+                    console.warn('Could not load default quizzes:', error);
+                }
+
+                // Load from localStorage (imported quizzes)
+                const importedQuizzes = storageManager.getAllImportedExams();
+                allQuizzes = allQuizzes.concat(importedQuizzes);
+
+                // Render
+                if (allQuizzes.length === 0) {
+                    quizList.innerHTML = `
+                        <div class="col-12">
+                            <p class="text-center text-muted py-5">
+                                Chưa có bài thi nào.
+                                <a href="settings.html" class="text-primary">Import đề thi</a>
+                            </p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                quizList.innerHTML = '';
+
+                allQuizzes.forEach(quiz => {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-6 col-lg-4';
+                    col.dataset.title = quiz.title.toLowerCase();
+                    col.dataset.description = (quiz.description || '').toLowerCase();
+                    col.dataset.level = quiz.level;
+
+                    const totalPoints = quiz.questions ?
+                        quiz.questions.reduce((sum, q) => sum + q.point, 0) : 0;
+
+                    const sourceLabel = quiz.source === 'imported' ?
+                        '<span class="badge bg-warning text-dark"><i class="bi bi-download"></i> Imported</span>' : '';
+
+                    const levelColors = {
+                        'n5': 'success',
+                        'n4': 'info',
+                        'n3': 'warning',
+                        'n2': 'danger',
+                        'n1': 'dark'
+                    };
+                    const levelColor = levelColors[quiz.level] || 'secondary';
+
+                    col.innerHTML = `
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title">${quiz.title}</h5>
+                                    ${sourceLabel}
+                                </div>
+                                <p class="card-text text-muted small flex-grow-1">
+                                    ${quiz.description || 'Không có mô tả'}
+                                </p>
+                                <div class="mb-3">
+                                    <span class="badge bg-light text-dark me-1">
+                                        <i class="bi bi-file-text"></i> ${quiz.totalQuestions || quiz.questions?.length || 0} câu
+                                    </span>
+                                    <span class="badge bg-light text-dark me-1">
+                                        <i class="bi bi-star"></i> ${totalPoints} điểm
+                                    </span>
+                                    ${quiz.duration ? `<span class="badge bg-light text-dark">
+                                        <i class="bi bi-clock"></i> ${quiz.duration}p
+                                    </span>` : ''}
+                                    <span class="badge bg-${levelColor}">${quiz.level ? quiz.level.toUpperCase() : 'N/A'}</span>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <a href="quiz.html?id=${quiz.id}&source=${quiz.source || 'default'}&mode=practice"
+                                       class="btn btn-success">
+                                        <i class="bi bi-pencil"></i> Luyện Tập
+                                    </a>
+                                    <a href="quiz.html?id=${quiz.id}&source=${quiz.source || 'default'}&mode=test"
+                                       class="btn btn-primary">
+                                        <i class="bi bi-check2-square"></i> Kiểm Tra
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    quizList.appendChild(col);
+                });
+
+            } catch (error) {
+                console.error('Error loading quiz list:', error);
+                quizList.innerHTML = `
+                    <p style="text-align: center; color: var(--error-color); padding: 40px;">
+                        Có lỗi xảy ra. Vui lòng thử lại.
+                    </p>
+                `;
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            insertNavigation('home');
+            loadQuizList();
+        });
+
+        // Filter quizzes
+        function filterQuizzes() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const cols = document.querySelectorAll('#quiz-list > div');
+
+            cols.forEach(col => {
+                const title = col.dataset.title || '';
+                const description = col.dataset.description || '';
+                const level = col.dataset.level || '';
+
+                const matches = title.includes(searchTerm) ||
+                    description.includes(searchTerm) ||
+                    level.includes(searchTerm);
+
+                col.style.display = matches ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Thi Tiếng Nhật</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="quiz-container">
+        <!-- Header -->
+        <div class="header" id="header">
+            <a href="index.html" class="header-btn">⬅ Trở về</a>
+            <span id="q-number">Câu 1/20</span>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+            <span id="current-score">Điểm: 0</span>
+            <button class="header-btn" id="list-btn">☰ Danh sách</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content" id="quiz-content">
+            <div class="question-box" id="question-text">
+                <!-- Question content injected here -->
+            </div>
+
+            <div class="options-grid" id="options-container">
+                <!-- Options injected here -->
+            </div>
+
+            <div class="explanation-box" id="explanation">
+                <span class="explanation-title">💡 Giải thích chi tiết:</span>
+                <span id="explanation-text"></span>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="result-screen" id="result-screen">
+            <div class="score-circle" id="final-score">0</div>
+            <h2>Hoàn thành bài luyện tập!</h2>
+            <p id="result-message">Bạn đã làm rất tốt.</p>
+            <button class="btn-nav btn-next" onclick="location.reload()"
+                style="display:inline-block; margin-top:20px;">Làm lại bài thi</button>
+            <a href="history.html" class="btn-nav btn-primary"
+                style="display:inline-block; margin-top:20px; margin-left:10px; text-decoration:none; background: var(--success-color);">📊
+                Xem lịch sử</a>
+            <a href="index.html" class="btn-nav btn-prev"
+                style="display:inline-block; margin-top:20px; margin-left:10px; text-decoration:none;">Về trang chủ</a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer" id="footer">
+            <button class="btn-nav btn-prev" id="prev-btn">⬅ Câu trước</button>
+            <button class="btn-nav" id="check-btn"
+                style="background: var(--warning-color); color: #000; display: none;">
+                🔍 Kiểm tra đáp án
+            </button>
+            <button class="btn-nav btn-next" id="next-btn">Câu tiếp theo ➜</button>
+        </div>
+
+        <!-- Modal for Question List -->
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Danh sách câu hỏi</h3>
+                    <button class="close-btn" id="close-modal">&times;</button>
+                </div>
+                <div class="q-grid" id="q-grid">
+                    <!-- Grid items injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/quiz.js"></script>
+</body>
+
+</html>

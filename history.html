@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Sử Luyện Tập</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <!-- Navigation will be inserted here by JS -->
+
+    <div class="container my-4">
+        <!-- Statistics Section -->
+        <div class="text-center mb-4">
+            <h2 class="display-6 fw-bold text-primary">
+                <i class="bi bi-graph-up"></i> Thống Kê Tổng Quan
+            </h2>
+        </div>
+
+        <div class="row g-3 mb-5">
+            <div class="col-6 col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3 class="text-primary mb-0" id="total-attempts">0</h3>
+                        <small class="text-muted">Lần làm bài</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3 class="text-success mb-0" id="average-score">0%</h3>
+                        <small class="text-muted">Điểm TB</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3 class="text-warning mb-0" id="best-score">0%</h3>
+                        <small class="text-muted">Cao nhất</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3 class="text-info mb-0" id="total-questions">0</h3>
+                        <small class="text-muted">Tổng câu</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History List -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="text-primary mb-0">
+                <i class="bi bi-clock-history"></i> Lịch Sử Chi Tiết
+            </h3>
+            <button class="btn btn-danger btn-sm" onclick="clearAllHistory()">
+                <i class="bi bi-trash"></i> Xóa tất cả
+            </button>
+        </div>
+
+        <div id="history-list">
+            <p class="text-center text-muted py-5">Chưa có lịch sử làm bài</p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/history.js"></script>
+    <script src="js/navigation.js"></script>
+    <script>
+        // Load data
+        document.addEventListener('DOMContentLoaded', () => {
+            insertNavigation('history');
+            loadStatistics();
+            loadHistoryList();
+        });
+
+        function loadStatistics() {
+            const stats = historyManager.getStatistics();
+            document.getElementById('total-attempts').textContent = stats.totalAttempts;
+            document.getElementById('average-score').textContent = stats.averageScore + '%';
+            document.getElementById('best-score').textContent = stats.bestScore + '%';
+            document.getElementById('total-questions').textContent = stats.totalQuestions;
+        }
+
+        function loadHistoryList() {
+            const history = historyManager.getHistory();
+            const listDiv = document.getElementById('history-list');
+
+            if (history.length === 0) {
+                listDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 40px;">Chưa có lịch sử làm bài</p>';
+                return;
+            }
+
+            listDiv.innerHTML = history.map(record => {
+                const date = new Date(record.timestamp);
+                const dateStr = date.toLocaleDateString('vi-VN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const modeClass = record.mode === 'test' ? 'danger' : 'success';
+                const modeIcon = record.mode === 'test' ? 'check2-square' : 'pencil';
+                const modeText = record.mode === 'test' ? 'Kiểm Tra' : 'Luyện Tập';
+
+                const scoreClass = record.percentage >= 80 ? 'success' :
+                                   record.percentage >= 60 ? 'warning' : 'danger';
+
+                const durationStr = record.duration ? formatDuration(record.duration) : '';
+
+                return `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap">
+                                <div class="flex-grow-1 mb-2 mb-md-0">
+                                    <h5 class="card-title mb-2">
+                                        ${record.quizTitle}
+                                        <span class="badge bg-${modeClass} ms-2">
+                                            <i class="bi bi-${modeIcon}"></i> ${modeText}
+                                        </span>
+                                    </h5>
+                                    <p class="card-text small text-muted mb-1">
+                                        <i class="bi bi-calendar"></i> ${dateStr}
+                                    </p>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <span class="badge bg-light text-dark">
+                                            <i class="bi bi-check-circle"></i> ${record.correctCount}/${record.totalQuestions} câu
+                                        </span>
+                                        <span class="badge bg-${scoreClass}">
+                                            <i class="bi bi-star"></i> ${record.score}/${record.totalScore} điểm (${record.percentage.toFixed(1)}%)
+                                        </span>
+                                        ${durationStr ? `<span class="badge bg-info">
+                                            <i class="bi bi-clock"></i> ${durationStr}
+                                        </span>` : ''}
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2 flex-nowrap">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${record.id})">
+                                        <i class="bi bi-eye"></i> Chi tiết
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteRecord(${record.id})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatDuration(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function viewDetail(id) {
+            const history = historyManager.getHistory();
+            const record = history.find(h => h.id === id);
+
+            if (!record) return;
+
+            let detailHTML = `
+                <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+                    <h3>${record.quizTitle}</h3>
+                    <p>Chế độ: ${record.mode === 'test' ? 'Kiểm tra' : 'Luyện tập'}</p>
+                    <p>Kết quả: ${record.score}/${record.totalScore} điểm (${record.percentage.toFixed(1)}%)</p>
+                    <p>Đúng: ${record.correctCount}/${record.totalQuestions} câu</p>
+                    <hr>
+                    <h4>Chi tiết từng câu:</h4>
+            `;
+
+            record.answers.forEach((ans, idx) => {
+                const isCorrect = ans.userChoice === ans.correct;
+                const icon = isCorrect ? '✅' : '❌';
+                detailHTML += `
+                    <p><strong>${icon} Câu ${idx + 1}:</strong> ${isCorrect ? 'Đúng' : 'Sai'}
+                    (Chọn: ${ans.userChoice}, Đáp án: ${ans.correct})</p>
+                `;
+            });
+
+            detailHTML += '</div>';
+
+            // Show modal
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;';
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 10px; max-width: 900px; max-height: 90vh; overflow-y: auto; padding: 20px; position: relative;">
+                    <button onclick="this.closest('div[style*=fixed]').remove()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+                    ${detailHTML}
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+        }
+
+        function deleteRecord(id) {
+            if (confirm('Bạn có chắc muốn xóa record này?')) {
+                if (historyManager.deleteRecord(id)) {
+                    loadStatistics();
+                    loadHistoryList();
+                }
+            }
+        }
+
+        function clearAllHistory() {
+            if (confirm('⚠️ Bạn có chắc muốn xóa TẤT CẢ lịch sử? Hành động này không thể hoàn tác!')) {
+                if (confirm('Xác nhận lần cuối!')) {
+                    if (historyManager.clearAll()) {
+                        loadStatistics();
+                        loadHistoryList();
+                        alert('✅ Đã xóa tất cả lịch sử!');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
+

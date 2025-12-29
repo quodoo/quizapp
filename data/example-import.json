@@ -1,0 +1,74 @@
+{
+  "quizzes": [
+    {
+      "id": "simple-format-demo",
+      "title": "Demo Format Đơn Giản - Không cần Ruby Tags!",
+      "level": "n5",
+      "totalQuestions": 5,
+      "description": "Ví dụ sử dụng format đơn giản cho furigana",
+      "questions": [
+        {
+          "q": "私[わたし]は学生[がくせい]です。",
+          "options": [
+            "a. はい、学生[がくせい]です",
+            "b. いいえ、先生[せんせい]です",
+            "c. 会社員[かいしゃいん]です",
+            "d. 医者[いしゃ]です"
+          ],
+          "correct": 0,
+          "point": 1,
+          "explain": "Format đơn giản: chỉ cần viết 漢字[ふりがな] là tự động chuyển thành ruby tags!"
+        },
+        {
+          "q": "毎日[まいにち]学校[がっこう]へ行[い]きます。",
+          "options": [
+            "a. 電車[でんしゃ]で",
+            "b. 自転車[じてんしゃ]で",
+            "c. 歩[ある]いて",
+            "d. 車[くるま]で"
+          ],
+          "correct": 2,
+          "point": 1,
+          "explain": "Có thể mix: 歩[ある]いて (có furigana) và いて (không cần furigana vì là hiragana)"
+        },
+        {
+          "q": "これは何[なん]ですか。",
+          "options": [
+            "a. 本[ほん]です",
+            "b. 鉛筆[えんぴつ]です",
+            "c. ノートです",
+            "d. 消[け]しゴムです"
+          ],
+          "correct": 0,
+          "point": 1,
+          "explain": "Katakana (ノート) không cần furigana. Chỉ thêm cho Kanji!"
+        },
+        {
+          "q": "昨日[きのう]、映画[えいが]を見[み]ました。",
+          "options": [
+            "a. 面白[おもしろ]かったです",
+            "b. つまらなかったです",
+            "c. 怖[こわ]かったです",
+            "d. 悲[かな]しかったです"
+          ],
+          "correct": 0,
+          "point": 2,
+          "explain": "昨日[きのう] - Đơn giản hơn nhiều so với <ruby>昨<rt>きの</rt></ruby><ruby>日<rt>う</rt></ruby>!"
+        },
+        {
+          "q": "日本語[にほんご]の勉強[べんきょう]は難[むずか]しいですか。",
+          "options": [
+            "a. はい、とても難[むずか]しいです",
+            "b. いいえ、簡単[かんたん]です",
+            "c. 少[すこ]し難[むずか]しいです",
+            "d. 普通[ふつう]です"
+          ],
+          "correct": 2,
+          "point": 2,
+          "explain": "Format này dễ viết hơn nhiều! Người dùng chỉ cần biết cách gõ tiếng Nhật cơ bản."
+        }
+      ]
+    }
+  ]
+}
+
