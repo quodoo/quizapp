@@ -5,6 +5,7 @@
             "title": "Demo Format Đơn Giản - Không cần Ruby Tags!",
             "level": "n5",
             "totalQuestions": 5,
+            "duration": 5,
             "description": "Ví dụ sử dụng format đơn giản cho furigana",
             "questions": [
                 {
